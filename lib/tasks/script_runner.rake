@@ -7,6 +7,7 @@ namespace :scripts do
     arg = { words: sentence.downcase.split }.to_json
 
     output = `Rscript --vanilla #{filepath} -p '#{arg}'`
+    puts 'Categories: 1 - spam, 2 - legitimate'
     puts output
   end
 end
