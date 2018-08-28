@@ -1,3 +1,7 @@
+#Load the required library silently
+suppressPackageStartupMessages(require(jsonlite))
+suppressPackageStartupMessages(require(optparse))
+
 # training set
 spam <- list(c("buy", "drugs", "online", "from", "our", "pharma"),
             c("buy", "insurance", "at", "low", "prices"),
@@ -62,20 +66,30 @@ classify <- function(test_mail) {
     for (i in 1:categories) {
         scores[i] = score(test_mail, i)
     }
-    print(scores)
-    which(scores==max(scores))
+    # print(scores)
+    result <- which(scores==max(scores))
+    list(scores=scores,result=result)
 }
 
+# Set up the script option parsing
+option_list = list(
+  make_option(c("-p", "--params"), action="store", default=NA, type='character',
+              help="a valid JSON")
+)
 
-# https://quickleft.com/blog/running-r-script-ruby-rails-app/
+opt_parser = OptionParser(option_list=option_list)
+opt = parse_args(opt_parser)
 
+# Validate the Option parameters
+if (is.null(opt$params) | !validate(opt$params)){
+  print_help(opt_parser)
+  stop("At least one argument must be supplied or the JSON must be valid.", call.=FALSE)
+}
 
+params <- fromJSON(opt$params)
+words <- params$words
 
-# validation set
-print(classify(c("ruby", "on", "rails", "architecture")))
-print(classify(c("free", "drugs")))
-print(classify(c("r", "article")))
-print(classify(c("generate", "100000", "dollar", "income", "from", "home")))
-print(classify(c("rails", "changelog")))
-print(classify(c("buy", "car", "with", "huge", "discount")))
-print(classify(c("best", "ruby", "libraries")))
+out <- classify(words)
+
+# Return the JSON
+toJSON(out,auto_unbox=TRUE)
