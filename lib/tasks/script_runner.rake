@@ -1,8 +1,13 @@
 namespace :scripts do
   desc 'Runs an external R script'
-  task run_r: :environment do
-    filepath = Rails.root.join('lib', 'external_scripts', 'hello_world.R')
-    output = `Rscript --vanilla #{filepath} 'Mietek'`
+  task :detect_spam, [:sentence] => :environment do |_t, args|
+    sentence = args[:sentence]
+    filepath = Rails.root.join('lib', 'external_scripts', 'spam_detect.R')
+
+    arg = { words: sentence.downcase.split }.to_json
+
+    output = `Rscript --vanilla #{filepath} -p '#{arg}'`
+    puts 'Categories: 1 - spam, 2 - legitimate'
     puts output
   end
 end
